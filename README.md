@@ -1,0 +1,3 @@
+# GoogleAnalytics-to-slack
+
+GoogleAnalyticsのAPIからレポートを取得してSlackに連携します。
