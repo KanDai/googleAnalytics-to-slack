@@ -13,8 +13,12 @@ $profile   = getFirstProfileId($analytics);
 
 
   // $report = getReport($analytics, $profile, 'weekly');
+  // $ranking = getRanking($analytics, $profile, 'weekly');
   // $report = getReport($analytics, $profile, 'monthly');
+  // $ranking = getRanking($analytics, $profile, 'monthly');
+
   // var_dump( $report );
+  // var_dump( $ranking );
 
 
 function initializeAnalytics($KEY_FILE, $APP_NAME) {
@@ -138,6 +142,48 @@ function getReport($analytics, $profile, $term){
     $report .= '直帰率 : ' . round( $this_term_data[0][4], 1 ) . '%' . calcReport( $this_term_data[0][4], $last_term_data[0][4], 1 ) .  "\n";
 
     return $report;
+}
+
+// 人気記事を取得
+// -------------------------
+
+function getRanking($analytics, $profile, $term){
+
+    // 日付を取得
+    if ($term == 'weekly'){
+        $start  = date('Y-m-d', strtotime('-1 week'));
+        $end    = date('Y-m-d', strtotime('-1 day'));
+        $length = '10';
+    }
+    if ($term == 'monthly'){
+        $start  = date('Y-m-d', strtotime(date('Y-m-01') . '-1 month'));
+        $end    = date('Y-m-d', strtotime(date('Y-m-01') . '-1 day'));
+        $length = '20';
+    }
+
+    $results = $analytics->data_ga->get(
+        'ga:' . $profile,
+        $start,
+        $end,
+        'ga:pageviews',
+        array(
+            'dimensions'  => 'ga:pageTitle',  // データの区切り
+            'sort'        => '-ga:pageviews', // ページビューでソート
+            'max-results' => $length,         // 取得件数
+        )
+    );
+
+    // 取得したデータから必要な部分を抽出
+    $data = $results->rows;
+
+    // 配列で取得したデータをループで回してランキングに
+    $ranking = $start . '〜' . $end . 'の記事ランキング' . "\n";
+    foreach ($data as $key => $row) {
+        $title = str_replace('', '', $row[0]);
+        $ranking .= ($key + 1) . '.' . $title . ' ' . $row[1] . 'PV' . "\n";
+    }
+
+    return $ranking;
 }
 
 
