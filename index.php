@@ -10,8 +10,11 @@ require_once './vendor/autoload.php';
 $analytics = initializeAnalytics($KEY_FILE, $APP_NAME);
 $profile   = getFirstProfileId($analytics);
 
-$results   = getResults($analytics, $profile, $entryData);
-outputResults($results, $path);
+
+
+  // $report = getReport($analytics, $profile, 'weekly');
+  // $report = getReport($analytics, $profile, 'monthly');
+  // var_dump( $report );
 
 
 function initializeAnalytics($KEY_FILE, $APP_NAME) {
@@ -71,32 +74,70 @@ function getFirstProfileId($analytics) {
   }
 }
 
+// レポート取得
+// -------------------------
 
-function getResults($analytics, $profileId, $entryData) {
+function getReport($analytics, $profile, $term){
 
-  // ランキング生成設定
-  $start  = date('Y-m-d', strtotime('-1 week')); // 取得開始する日付
-  $end    = date('Y-m-d', strtotime('-1 day'));  // 取得終了する日付
-  $length = '10';                                // 取得件数
+    // 日付を取得
+    if ($term == 'weekly'){
+        $start_this_term = date('Y-m-d', strtotime('-1 week'));
+        $end_this_term   = date('Y-m-d', strtotime('-1 day'));
+        $start_last_term = date('Y-m-d', strtotime('-2 week'));
+        $end_last_term   = date('Y-m-d', strtotime('-1 week - 1 day'));
+    }
+    if ($term == 'monthly'){
+        $start_this_term = date('Y-m-d', strtotime(date('Y-m-01') . '-1 month'));
+        $end_this_term   = date('Y-m-d', strtotime(date('Y-m-01') . '-1 day'));
+        $start_last_term = date('Y-m-d', strtotime(date('Y-m-01') . '-2 month'));
+        $end_last_term   = date('Y-m-d', strtotime(date('Y-m-01') . '-1 month -1 day'));
+    }
 
-  // APIからデータ取得
-  $results = $analytics->data_ga->get(
-      'ga:' . $profileId,
-      $start,
-      $end,
-      'ga:pageviews',
-      array(
-          'dimensions'  => 'ga:pageTitle,ga:pagePath',
-          'sort'        => '-ga:pageviews',
-          'max-results' => $length,
-      )
-  );
+    // セッション・PV・平均閲覧ページ数・平均セッション時間・直帰率を取得
+    $results_this_term = $analytics->data_ga->get(
+        'ga:' . $profile,
+        $start_this_term,
+        $end_this_term,
+        'ga:sessions,ga:pageviews,ga:pageviewsPerSession,ga:avgSessionDuration,ga:bounceRate'
+    );
 
-  return $results->rows;
+    $results_last_term = $analytics->data_ga->get(
+        'ga:' . $profile,
+        $start_last_term,
+        $end_last_term,
+        'ga:sessions,ga:pageviews,ga:pageviewsPerSession,ga:avgSessionDuration,ga:bounceRate'
+    );
+
+    // 取得したデータから必要な部分を抽出
+    $this_term_data = $results_this_term->rows;
+    $last_term_data = $results_last_term->rows;
+
+    // 先週と今週のレポートを比較して増減を計算
+    // 直帰率だけ増減の矢印を逆に
+    function calcReport($this, $last, $bounce_rate){
+        $result = round( $this - $last, 2 );
+        if($result > 0){
+            $print = ' (+' . $result . ') ';
+            $print .= ($bounce_rate == 0) ? '↗' : '↘';
+            return $print;
+        } elseif($result < 0) {
+            $print = ' (' . $result . ') ';
+            $print .= ($bounce_rate == 1) ? '↗' : '↘';
+            return $print;
+        } else {
+            return ' (0) →';
+        }
+    }
+
+    // データを見やすく整形
+    $report = $start_this_term . '〜' . $end_this_term . 'のレポート' . "\n";
+    $report .= '訪問数 : ' . $this_term_data[0][0] . calcReport( $this_term_data[0][0], $last_term_data[0][0], 0 ) . "\n";
+    $report .= '合計PV : ' . $this_term_data[0][1] . calcReport( $this_term_data[0][1], $last_term_data[0][1], 0 ) . "\n";
+    $report .= '平均閲覧ページ数 : ' . round( $this_term_data[0][2], 2 ) . calcReport( $this_term_data[0][2], $last_term_data[0][2], 0 ) . "\n";
+    $report .= '平均滞在時間 : ' . ceil( $this_term_data[0][3] ) . '秒' . calcReport( $this_term_data[0][3], $last_term_data[0][3], 0 ) . "\n";
+    $report .= '直帰率 : ' . round( $this_term_data[0][4], 1 ) . '%' . calcReport( $this_term_data[0][4], $last_term_data[0][4], 1 ) .  "\n";
+
+    return $report;
 }
 
-function outputResults($results) {
-
-  var_dump( $results );
-}
 
