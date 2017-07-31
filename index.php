@@ -26,11 +26,11 @@ function initializeAnalytics() {
   // Use the developers console and download your service account
   // credentials in JSON format. Place them in this directory or
   // change the key file location if necessary.
-  $KEY_FILE_LOCATION = _KEY_FILE;
+  $KEY_FILE_LOCATION = KEY_FILE;
 
   // Create and configure a new client object.
   $client = new Google_Client();
-  $client->setApplicationName(_APP_NAME);
+  $client->setApplicationName(APP_NAME);
   $client->setAuthConfig($KEY_FILE_LOCATION);
   $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
   $analytics = new Google_Service_Analytics($client);
