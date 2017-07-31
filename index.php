@@ -11,7 +11,6 @@ $analytics = initializeAnalytics($KEY_FILE, $APP_NAME);
 $profile   = getFirstProfileId($analytics);
 
 
-
   // $report = getReport($analytics, $profile, 'weekly');
   // $ranking = getRanking($analytics, $profile, 'weekly');
   // $report = getReport($analytics, $profile, 'monthly');
@@ -21,17 +20,17 @@ $profile   = getFirstProfileId($analytics);
   // var_dump( $ranking );
 
 
-function initializeAnalytics($KEY_FILE, $APP_NAME) {
+function initializeAnalytics() {
   // Creates and returns the Analytics Reporting service object.
 
   // Use the developers console and download your service account
   // credentials in JSON format. Place them in this directory or
   // change the key file location if necessary.
-  $KEY_FILE_LOCATION = $KEY_FILE;
+  $KEY_FILE_LOCATION = _KEY_FILE;
 
   // Create and configure a new client object.
   $client = new Google_Client();
-  $client->setApplicationName($APP_NAME);
+  $client->setApplicationName(_APP_NAME);
   $client->setAuthConfig($KEY_FILE_LOCATION);
   $client->setScopes(['https://www.googleapis.com/auth/analytics.readonly']);
   $analytics = new Google_Service_Analytics($client);
