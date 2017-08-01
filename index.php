@@ -11,16 +11,16 @@ $analytics = initializeAnalytics();
 $profile   = getFirstProfileId($analytics);
 
 
-  $report = getReport($analytics, $profile, 'daily');
-  // $ranking = getRanking($analytics, $profile, 'daily');
+  // $report = getReport($analytics, $profile, 'daily');
+  $ranking = getRanking($analytics, $profile, 'daily');
 
   // $report = getReport($analytics, $profile, 'weekly');
   // $ranking = getRanking($analytics, $profile, 'weekly');
   // $report = getReport($analytics, $profile, 'monthly');
   // $ranking = getRanking($analytics, $profile, 'monthly');
 
-  var_dump( $report );
-  // var_dump( $ranking );
+  // var_dump( $report );
+  var_dump( $ranking );
 
 
 function initializeAnalytics() {
@@ -162,6 +162,11 @@ function getReport($analytics, $profile, $term){
 function getRanking($analytics, $profile, $term){
 
     // 日付を取得
+    if ($term == 'daily'){
+        $start  = date('Y-m-d', strtotime('-1 day'));
+        $end    = date('Y-m-d', strtotime('-1 day'));
+        $length = '10';
+    }
     if ($term == 'weekly'){
         $start  = date('Y-m-d', strtotime('-1 week'));
         $end    = date('Y-m-d', strtotime('-1 day'));
@@ -189,7 +194,12 @@ function getRanking($analytics, $profile, $term){
     $data = $results->rows;
 
     // 配列で取得したデータをループで回してランキングに
-    $ranking = $start . '〜' . $end . 'の記事ランキング' . "\n";
+    $ranking = $start;
+    if ($term != 'daily') {
+      $ranking .= '〜' . $end;
+    }
+    $ranking .= 'の記事ランキング' . "\n";
+
     foreach ($data as $key => $row) {
         $title = str_replace('', '', $row[0]);
         $ranking .= ($key + 1) . '.' . $title . ' ' . $row[1] . 'PV' . "\n";
