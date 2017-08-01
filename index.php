@@ -7,16 +7,19 @@ require_once './config.php';
 require_once './vendor/autoload.php';
 
 // Get Analytics Profile
-$analytics = initializeAnalytics($KEY_FILE, $APP_NAME);
+$analytics = initializeAnalytics();
 $profile   = getFirstProfileId($analytics);
 
+
+  $report = getReport($analytics, $profile, 'daily');
+  // $ranking = getRanking($analytics, $profile, 'daily');
 
   // $report = getReport($analytics, $profile, 'weekly');
   // $ranking = getRanking($analytics, $profile, 'weekly');
   // $report = getReport($analytics, $profile, 'monthly');
   // $ranking = getRanking($analytics, $profile, 'monthly');
 
-  // var_dump( $report );
+  var_dump( $report );
   // var_dump( $ranking );
 
 
@@ -83,6 +86,12 @@ function getFirstProfileId($analytics) {
 function getReport($analytics, $profile, $term){
 
     // 日付を取得
+    if ($term == 'daily'){
+        $start_this_term = date('Y-m-d', strtotime('-1 day'));
+        $end_this_term   = date('Y-m-d', strtotime('-1 day'));
+        $start_last_term = date('Y-m-d', strtotime('-2 day'));
+        $end_last_term   = date('Y-m-d', strtotime('-2 day'));
+    }
     if ($term == 'weekly'){
         $start_this_term = date('Y-m-d', strtotime('-1 week'));
         $end_this_term   = date('Y-m-d', strtotime('-1 day'));
@@ -133,7 +142,11 @@ function getReport($analytics, $profile, $term){
     }
 
     // データを見やすく整形
-    $report = $start_this_term . '〜' . $end_this_term . 'のレポート' . "\n";
+    $report = $start_this_term;
+    if ($term != 'daily') {
+      $report .= '〜' . $end_this_term;
+    }
+    $report .= 'のレポート' . "\n";
     $report .= '訪問数 : ' . $this_term_data[0][0] . calcReport( $this_term_data[0][0], $last_term_data[0][0], 0 ) . "\n";
     $report .= '合計PV : ' . $this_term_data[0][1] . calcReport( $this_term_data[0][1], $last_term_data[0][1], 0 ) . "\n";
     $report .= '平均閲覧ページ数 : ' . round( $this_term_data[0][2], 2 ) . calcReport( $this_term_data[0][2], $last_term_data[0][2], 0 ) . "\n";
