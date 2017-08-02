@@ -1,31 +1,71 @@
 <?php
 
+// ----------------------------------------------------
+// Require Setting / Library
+// ----------------------------------------------------
+
 // Load Config
 require_once './config.php';
 
 // Load the Google API PHP Client Library.
 require_once './vendor/autoload.php';
 
+
+// ----------------------------------------------------
+// Execute Functions
+// ----------------------------------------------------
+
 // Get Analytics Profile
 $analytics = initializeAnalytics();
 $profile   = getFirstProfileId($analytics);
 
+// 曜日を取得
+$date_week = date("w");
+$date_day  = date("d");
 
-  // $report = getReport($analytics, $profile, 'daily');
-  $ranking = getRanking($analytics, $profile, 'daily');
+// 日毎レポート配信
+if ( D_REPORT == true ) {
+  $result = getReport($analytics, $profile, 'daily');
+  postToSlack($result);
+}
 
-  // $report = getReport($analytics, $profile, 'weekly');
-  // $ranking = getRanking($analytics, $profile, 'weekly');
-  // $report = getReport($analytics, $profile, 'monthly');
-  // $ranking = getRanking($analytics, $profile, 'monthly');
+// 日毎ランキング配信
+if ( D_RANKING == true ) {
+  $result = getRanking($analytics, $profile, 'daily');
+  postToSlack($result);
+}
 
-  // var_dump( $report );
-  var_dump( $ranking );
+// 週間レポート配信
+if ( W_REPORT == true && $date_week == W_REPORT_TIME ) {
+  $result = getReport($analytics, $profile, 'weekly');
+  postToSlack($result);
+}
+
+// 週間レポート配信
+if ( W_RANKING == true && $date_week == W_RANKING_TIME ) {
+  $result = getRanking($analytics, $profile, 'weekly');
+  postToSlack($result);
+}
+
+// 月間レポート配信
+if ( M_REPORT == true && $date_day == M_REPORT_TIME ) {
+  $result = getReport($analytics, $profile, 'monthly');
+  postToSlack($result);
+}
+
+// 月間レポート配信
+if ( M_RANKING == true && $date_day == M_RANKING_TIME ) {
+  $result = getRanking($analytics, $profile, 'monthly');
+  postToSlack($result);
+}
 
 
+// ----------------------------------------------------
+// Set Functions
+// ----------------------------------------------------
+
+// Creates and returns the Analytics Reporting service object.
 function initializeAnalytics() {
-  // Creates and returns the Analytics Reporting service object.
-
   // Use the developers console and download your service account
   // credentials in JSON format. Place them in this directory or
   // change the key file location if necessary.
@@ -41,9 +81,8 @@ function initializeAnalytics() {
   return $analytics;
 }
 
+// Get the user's first view (profile) ID.
 function getFirstProfileId($analytics) {
-  // Get the user's first view (profile) ID.
-
   // Get the list of accounts for the authorized user.
   $accounts = $analytics->management_accounts->listManagementAccounts();
 
