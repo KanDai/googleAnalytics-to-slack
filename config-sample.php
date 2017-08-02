@@ -17,6 +17,9 @@ const D_RANKING_LENGTH = 10;
 const W_RANKING_LENGTH = 10;
 const M_RANKING_LENGTH = 20;
 
+// タイトル内で削除したい文字列
+const RANKING_REPLACE_TEXT = '';
+
 // レポートを送るタイミング
 const W_REPORT_TIME  = 1;
 const W_RANKING_TIME = 1;

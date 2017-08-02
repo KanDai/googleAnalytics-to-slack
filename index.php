@@ -165,17 +165,17 @@ function getRanking($analytics, $profile, $term){
     if ($term == 'daily'){
         $start  = date('Y-m-d', strtotime('-1 day'));
         $end    = date('Y-m-d', strtotime('-1 day'));
-        $length = '10';
+        $length = D_RANKING_LENGTH;
     }
     if ($term == 'weekly'){
         $start  = date('Y-m-d', strtotime('-1 week'));
         $end    = date('Y-m-d', strtotime('-1 day'));
-        $length = '10';
+        $length = W_RANKING_LENGTH;
     }
     if ($term == 'monthly'){
         $start  = date('Y-m-d', strtotime(date('Y-m-01') . '-1 month'));
         $end    = date('Y-m-d', strtotime(date('Y-m-01') . '-1 day'));
-        $length = '20';
+        $length = M_RANKING_LENGTH;
     }
 
     $results = $analytics->data_ga->get(
@@ -201,7 +201,7 @@ function getRanking($analytics, $profile, $term){
     $ranking .= 'の記事ランキング' . "\n";
 
     foreach ($data as $key => $row) {
-        $title = str_replace('', '', $row[0]);
+        $title = str_replace(RANKING_REPLACE_TEXT, '', $row[0]);
         $ranking .= ($key + 1) . '.' . $title . ' ' . $row[1] . 'PV' . "\n";
     }
 
