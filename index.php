@@ -209,3 +209,32 @@ function getRanking($analytics, $profile, $term){
 }
 
 
+// Slackに送信する仕組み
+// -------------------------
+
+function postToSlack($text){
+
+    $args = array(
+        'token'      => SLACK_TOKEN,
+        'channel'    => SLACK_CHANNEL,
+        'text'       => $text,
+        'username'   => SLACK_USERNAME,
+        'icon_emoji' => SLACK_ICON,
+    );
+
+    $content = http_build_query($args);
+
+    $header = [
+        "Content-Type: application/x-www-form-urlencoded",
+        "Content-Length: ".strlen($content)
+    ];
+    $options = [
+        'http' => [
+            'method' => 'POST',
+            'header' => implode("\r\n", $header),
+            'content' => $content,
+        ]
+    ];
+    $ret = file_get_contents(SLACK_URL, false, stream_context_create($options));
+    return;
+}

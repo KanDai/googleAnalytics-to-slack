@@ -27,6 +27,7 @@ const M_REPORT_TIME  = 1;
 const M_RANKING_TIME = 1;
 
 // SLACKの設定
+const SLACK_URL      = 'https://slack.com/api/chat.postMessage';
 const SLACK_TOKEN    = "";
 const SLACK_CHANNEL  = "";
 const SLACK_USERNAME = "";
